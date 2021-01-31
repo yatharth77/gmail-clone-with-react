@@ -7,7 +7,6 @@ class Logout extends Component {
     }
 
     handleResponse = () => {
-        console.log("Logged out successfull")
         this.props.setSignedInState({ signedIn: false });
     }
     render(){

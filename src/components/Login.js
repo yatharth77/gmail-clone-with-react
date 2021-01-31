@@ -1,4 +1,4 @@
-import React, { Component, useCallback } from 'react'
+import React, { Component } from 'react'
 import { GoogleLogin } from 'react-google-login'
 import { refreshTokenSetup } from '../utils/refreshToken'
 import { CLIENT_ID, SCOPES } from '../utils/googleCredentials'
@@ -35,7 +35,6 @@ class Login extends Component {
     }
 
     getMessages = (messagesArray) => {
-        console.log(messagesArray);
         for(let i = 0; i < messagesArray.length; i++){
             var request = new XMLHttpRequest()
             request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+messagesArray[i]["id"]);
@@ -54,8 +53,6 @@ class Login extends Component {
         this.setState({ accessToken: response.tokenObj.access_token });
         this.props.setSignedInState({ signedIn: true });
         refreshTokenSetup(response)
-
-        this.getInbox(this.getMessages);
     }
   render(){
       return(
@@ -65,6 +62,8 @@ class Login extends Component {
                 scope={SCOPES} 
                 onSuccess={this.handleResponse}
             />
+            <button onClick={ () => this.getLabels()}>Fetch labels</button>
+            <button onClick={ () => this.getInbox(this.getMessages)}>Fetch mails</button>
         </div>
       )
   }
