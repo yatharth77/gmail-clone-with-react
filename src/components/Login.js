@@ -1,26 +1,70 @@
-import React, { Component } from 'react'
+import React, { Component, useCallback } from 'react'
 import { GoogleLogin } from 'react-google-login'
 import { refreshTokenSetup } from '../utils/refreshToken'
+import { CLIENT_ID, SCOPES } from '../utils/googleCredentials'
 
 class Login extends Component {
-  handleResponse = (response) => {
-    var request = new XMLHttpRequest()
-    request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/labels?key=AIzaSyAYZRiPLCH5hDAyIeRbjX7y67SkGfCVIN8', true)
-    request.setRequestHeader('Authorization', 'Bearer ' + response.tokenObj.access_token);
-    request.onload = function (res) {
-      console.log(res);
+    
+    constructor(props){
+        super(props);
+        this.state = {
+            accessToken: ""
+        }
     }
-    request.send()
-    refreshTokenSetup(response)
-  }
+
+    getLabels = () => {
+        var request = new XMLHttpRequest()
+        request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/labels');
+        request.setRequestHeader('Authorization', 'Bearer ' + this.state.accessToken);
+        request.onload = function (res) {
+            console.log(res.currentTarget.response);
+        }
+        request.send()
+    }
+
+    getInbox = (callback) => {
+        var request = new XMLHttpRequest();
+        request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/messages');
+        request.setRequestHeader('Authorization', 'Bearer ' + this.state.accessToken);
+        request.onload = function (res) {
+            const messagesJson = JSON.parse(res.currentTarget.response);
+            const messagesArray = messagesJson.messages;
+            callback(messagesArray);
+        }
+        request.send()
+    }
+
+    getMessages = (messagesArray) => {
+        console.log(messagesArray);
+        for(let i = 0; i < messagesArray.length; i++){
+            var request = new XMLHttpRequest()
+            request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+messagesArray[i]["id"]);
+            request.setRequestHeader('Authorization', 'Bearer ' + this.state.accessToken);
+            request.onload = function (res) {
+                console.log(res.currentTarget.response);
+            }
+            request.send()
+        }
+    }
+
+    handleResponse = (response) => {
+        if (!response.hasOwnProperty('accessToken')){
+            return;
+        }
+        this.setState({ accessToken: response.tokenObj.access_token });
+        this.props.setSignedInState({ signedIn: true });
+        refreshTokenSetup(response)
+
+        this.getInbox(this.getMessages);
+    }
   render(){
       return(
         <div>
-          <GoogleLogin 
-            clientId={'1025950630557-ir2p4fp2tnkl0co0il6jgee1ikhdd054.apps.googleusercontent.com'} 
-            scope={"https://mail.google.com/ https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/gmail.readonly"} 
-            onSuccess={this.handleResponse}
-          />
+            <GoogleLogin 
+                clientId={CLIENT_ID} 
+                scope={SCOPES} 
+                onSuccess={this.handleResponse}
+            />
         </div>
       )
   }
