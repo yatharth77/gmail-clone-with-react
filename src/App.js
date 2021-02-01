@@ -1,12 +1,17 @@
 import React, { Component } from 'react'
 import Login from './components/Login'
-import Logout from './components/Logout'
+import Sidebar from './components/Sidebar'
+// import Logout from './components/Logout'
+import './App.css'
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
         signedIn: false,
+        accessToken: "",
+        labels: {},
+        messages: [],
     }
   }
 
@@ -18,12 +23,51 @@ class App extends Component {
     this.setState({ signedIn: true});
   }
 
+  setAccessToken = (access_token) => {
+    this.setState({ accessToken: access_token });
+  }
+
+  setLabels = (labels) => {
+    this.setState({ labels: labels });
+  }
+
+  setMessages = (messages) => {
+    this.setState({
+      messages: [ ...this.state.messages, messages ]
+    });
+  }
+
   render(){
       return(
         <div>
-          { this.state.signedIn ? "Welcome, you are signed in" : "Click to Signin" }
-          <Login setSignedInState={this.signIn} />
-          <Logout setSignedInState={this.signOut} />
+          <div className="wrapper">
+              <nav id="sidebar">
+                <div className="sidebar-header">
+                  <h3>Welcome to Gmail clone</h3>
+                  <Login 
+                    setSignedInState={this.signIn} 
+                    accessToken={this.state.accessToken}
+                    setAccessToken={this.setAccessToken}
+                    setLabels={this.setLabels}
+                    setMessages={this.setMessages}
+                  />
+                  <Sidebar 
+                    signedInState={this.state.signedIn} 
+                    accessToken={this.state.accessToken}
+                    labels={this.state.labels}
+                  />
+                </div>
+              </nav>
+
+            <div className="login-div">
+              { this.state.signedIn 
+                ? <h1>Welcome, you are signed in {this.state.messages}</h1>
+                : <h1>Click to Signin</h1>
+              }
+
+            </div>
+            {/* <Logout setSignedInState={this.signOut} /> */}
+          </div>
         </div>
       )
   }
