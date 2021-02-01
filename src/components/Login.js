@@ -23,36 +23,36 @@ class Login extends Component {
         this.props.setLabels(labels);
     }
     
-    getInbox = (getMsgCallback, setMsgCallback) => {
+    getThreads = (getThreadCallback, setThreadCallback) => {
         var request = new XMLHttpRequest();
-        request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/messages');
+        request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/threads');
         request.setRequestHeader('Authorization', 'Bearer ' + this.props.accessToken);
         request.onload = function (res) {
-            const messagesJson = JSON.parse(res.currentTarget.response);
-            const messagesArray = messagesJson.messages;
-            getMsgCallback(messagesArray, setMsgCallback);
+            const threadJson = JSON.parse(res.currentTarget.response);
+            const threadArray = threadJson.threads;
+            getThreadCallback(threadArray, setThreadCallback);
         }
         request.send()
     }
 
-    getMessages = (messagesArray, setMsgCallback) => {
-        for(let i = 0; i < messagesArray.length; i++){
+    getThreadDetails = (threadArray, setThreadCallback) => {
+        for(let i = 0; i < threadArray.length; i++){
             var request = new XMLHttpRequest()
-            request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+messagesArray[i]["id"]);
+            request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/threads/"+threadArray[i]["id"]);
             request.setRequestHeader('Authorization', 'Bearer ' + this.props.accessToken);
             request.onload = function (res) {
-                const msgDetails = res.currentTarget.response;
-                setMsgCallback(msgDetails);
+                const threadDetails = res.currentTarget.response;
+                setThreadCallback(threadDetails);
             }
             request.send()
         }
     }
 
-    setMessages = (messageDetail) => {
-        messageDetail = JSON.parse(messageDetail);
-        console.log(messageDetail["snippet"]);
-        this.props.setMessages(messageDetail["snippet"]);
+    setThreadDetails = (threadDetails) => {
+        threadDetails = JSON.parse(threadDetails);
+        this.props.setThreadDetails(threadDetails);
     }
+
 
     handleResponse = (response) => {
         if (!response.hasOwnProperty('accessToken')){
@@ -61,7 +61,7 @@ class Login extends Component {
         this.props.setAccessToken(response.tokenObj.access_token);
         this.props.setSignedInState({ signedIn: true });
         this.getLabels(this.setLabels);
-        this.getInbox(this.getMessages, this.setMessages);
+        this.getThreads(this.getThreadDetails, this.setThreadDetails);
         refreshTokenSetup(response);
     }
     

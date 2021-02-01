@@ -1,0 +1,13 @@
+.list-group-header{
+    background-color: rgb(199, 230, 203);
+    text-decoration: underline;
+    font-size: 20px;
+}
+
+.list-group-item {
+    background-color: rgb(221, 230, 196);
+}
+
+.list-group {
+    font-size: 15px;
+}

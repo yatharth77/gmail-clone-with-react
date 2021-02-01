@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Login from './components/Login'
 import Sidebar from './components/Sidebar'
+import LoadMessages from './components/LoadMessages'
 // import Logout from './components/Logout'
 import './App.css'
 
@@ -11,7 +12,7 @@ class App extends Component {
         signedIn: false,
         accessToken: "",
         labels: {},
-        messages: [],
+        threadDetails: [],
     }
   }
 
@@ -31,10 +32,9 @@ class App extends Component {
     this.setState({ labels: labels });
   }
 
-  setMessages = (messages) => {
-    this.setState({
-      messages: [ ...this.state.messages, messages ]
-    });
+  setThreadDetails = (threadDetails) => {
+    this.setState({ threadDetails: [...this.state.threadDetails, threadDetails] });
+    console.log(this.state.threadDetails);
   }
 
   render(){
@@ -49,7 +49,7 @@ class App extends Component {
                     accessToken={this.state.accessToken}
                     setAccessToken={this.setAccessToken}
                     setLabels={this.setLabels}
-                    setMessages={this.setMessages}
+                    setThreadDetails={this.setThreadDetails}
                   />
                   <Sidebar 
                     signedInState={this.state.signedIn} 
@@ -61,7 +61,7 @@ class App extends Component {
 
             <div className="login-div">
               { this.state.signedIn 
-                ? <h1>Welcome, you are signed in {this.state.messages}</h1>
+                ? <h1>Welcome, you are signed <hr/> <LoadMessages threadDetails={this.state.threadDetails}/></h1>
                 : <h1>Click to Signin</h1>
               }
 
