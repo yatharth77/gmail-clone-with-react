@@ -15,7 +15,7 @@ class LoadMessages extends Component {
                     threadDetailsArray.map((thread, threadIndex) => {
                         const messages = thread.messages;
                         return (
-                            <div>
+                            <div key={threadIndex}>
                                 <a href="#" className="list-group-header">Message Thread {threadIndex+1}</a> 
                                 <div className="list-group">
                                 {
@@ -33,7 +33,6 @@ class LoadMessages extends Component {
     }
 
     render(){
-        // console.log(this.props.threadDetails);
         return(
             this.processThreads()
         )
