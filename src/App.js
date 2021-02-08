@@ -11,7 +11,7 @@ class App extends Component {
     this.state = {
         signedIn: false,
         accessToken: "",
-        labels: {},
+        labels: [],
         threadDetails: [],
     }
   }
@@ -34,7 +34,6 @@ class App extends Component {
 
   setThreadDetails = (threadDetails) => {
     this.setState({ threadDetails: [...this.state.threadDetails, threadDetails] });
-    console.log(this.state.threadDetails);
   }
 
   render(){

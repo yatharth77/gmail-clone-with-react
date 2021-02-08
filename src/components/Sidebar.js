@@ -6,12 +6,7 @@ class Sidebar extends Component {
     }
 
     processLabels = () => {
-        let labelJson = this.props.labels;
-        if( typeof(labelJson) == "string"){
-            labelJson = JSON.parse(labelJson);
-        }
-        const labelArray = labelJson["labels"]
-
+        let labelArray = this.props.labels;
         if(!labelArray){
             return (
                 <ul className="list-unstyled components">

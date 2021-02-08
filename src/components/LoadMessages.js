@@ -20,7 +20,7 @@ class LoadMessages extends Component {
                                 <div className="list-group">
                                 {
                                     messages.map((message, messageIndex) => {
-                                        return (<a href="#" className="list-group-item"><p>Message {messageIndex+1}:</p>{parse(message.snippet)}</a>)
+                                        return (<a href="#" className="list-group-item" key={messageIndex}><p>Message {messageIndex+1}:</p>{parse(message.snippet)}</a>)
                                     })
                                 }
                                 </div>
@@ -33,7 +33,7 @@ class LoadMessages extends Component {
     }
 
     render(){
-        console.log(this.props.threadDetails);
+        // console.log(this.props.threadDetails);
         return(
             this.processThreads()
         )
