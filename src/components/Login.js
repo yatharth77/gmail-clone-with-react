@@ -11,7 +11,8 @@ class Login extends Component {
         var db = new Dexie("flockdev07@gmail");
         db.version(1).stores({
             labels: 'id',
-            threads: 'id'
+            threads: 'id',
+            messages: 'id',
         })
         this.state = {
             dbInstance: db,
@@ -61,7 +62,7 @@ class Login extends Component {
     }
 
     // Setting threads
-    fetchMailsIndexedDB = (fetchThreadAPI, fetchThreadDetailsAPI, setThread, dbInstance) => {
+    fetchMailsIndexedDB = (fetchThreadAPI, fetchThreadDetailsAPI, setThread, fetchMessageDetails, dbInstance) => {
         Dexie.exists("flockdev07@gmail").then(function(exists) {
             if (exists){
                 new Dexie("flockdev07@gmail").open().then(function(db){
@@ -74,29 +75,29 @@ class Login extends Component {
 
                     }
                     else{
-                        fetchThreadAPI(fetchThreadDetailsAPI, setThread, dbInstance)
+                        fetchThreadAPI(fetchThreadDetailsAPI, setThread, fetchMessageDetails, dbInstance)
                     }
                 })
             }
             else{
-                fetchThreadAPI(fetchThreadDetailsAPI, setThread, dbInstance)
+                fetchThreadAPI(fetchThreadDetailsAPI, setThread, fetchMessageDetails, dbInstance)
             }
         })
     }
 
-    fetchThreadAPI = (fetchThreadDetailsAPI, setThread, dbInstance) => {
+    fetchThreadAPI = (fetchThreadDetailsAPI, setThread, fetchMessageDetails, dbInstance) => {
         var request = new XMLHttpRequest();
         request.open('GET', 'https://gmail.googleapis.com/gmail/v1/users/me/threads');
         request.setRequestHeader('Authorization', 'Bearer ' + this.props.accessToken);
         request.onload = function (res) {
             const threadJson = JSON.parse(res.currentTarget.response);
             const threadArray = threadJson.threads;
-            fetchThreadDetailsAPI(threadArray, setThread, dbInstance);
+            fetchThreadDetailsAPI(threadArray, setThread, fetchMessageDetails, dbInstance);
         }
         request.send()
     }
 
-    fetchThreadDetailsAPI = (threadArray, setThread, dbInstance) => {
+    fetchThreadDetailsAPI = (threadArray, setThread, fetchMessageDetails, dbInstance) => {
         for(let i = 0; i < threadArray.length; i++){
             var request = new XMLHttpRequest()
             request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/threads/"+threadArray[i]["id"]);
@@ -105,12 +106,27 @@ class Login extends Component {
                 const threadDetailsString = res.currentTarget.response;
                 const threadDetailsJson = JSON.parse(threadDetailsString);
                 setThread(threadDetailsJson);
+                fetchMessageDetails(threadDetailsJson.messages, dbInstance);
                 dbInstance.threads.put({ ...threadDetailsJson })
             }
             request.send()
         }
     }
 
+    fetchMessageDetails = (messageArray, dbInstance) => {
+        messageArray.map((value, index) => {
+            var request = new XMLHttpRequest()
+            request.open('GET', "https://gmail.googleapis.com/gmail/v1/users/me/messages/"+value.id);
+            request.setRequestHeader('Authorization', 'Bearer ' + this.props.accessToken);
+            request.onload = function (res) {
+                const messageString = res.currentTarget.response;
+                const messageJson = JSON.parse(messageString);
+                dbInstance.messages.put({ ...messageJson })
+            }
+            request.send()
+        })
+    }
+    
     setThread = (threadDetails) => {
         this.props.setThreadDetails(threadDetails);
     }
@@ -128,6 +144,7 @@ class Login extends Component {
         this.fetchMailsIndexedDB(this.fetchThreadAPI, 
             this.fetchThreadDetailsAPI, 
             this.setThread, 
+            this.fetchMessageDetails,
             this.state.dbInstance)
         refreshTokenSetup(response);
     }
