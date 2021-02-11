@@ -33,7 +33,7 @@ class App extends Component {
   }
 
   setThreadDetails = (threadDetails) => {
-    this.setState({ threadDetails: [...this.state.threadDetails, threadDetails] });
+    this.setState({ threadDetails: threadDetails });
   }
 
   render(){
@@ -54,6 +54,7 @@ class App extends Component {
                     signedInState={this.state.signedIn} 
                     accessToken={this.state.accessToken}
                     labels={this.state.labels}
+                    setThreadDetails={this.setThreadDetails}
                   />
                 </div>
               </nav>

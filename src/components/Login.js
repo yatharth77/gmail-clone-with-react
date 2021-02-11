@@ -18,7 +18,7 @@ class Login extends Component {
         var db = new Dexie("flockdev07@gmail");
         db.version(1).stores({
             labels: 'id',
-            threads: 'id',
+            threads: 'id, labels',
             messages: 'id',
         })
         this.setState({ dbInstance: db });
@@ -40,6 +40,16 @@ class Login extends Component {
             return null;
         }    
     }
+
+    // fetchMailsOfLabel = async (category="INBOX") => { 
+    //     const db  = this.state.dbInstance;
+    //     console.log(db, db.threads);
+    //     db.threads.filter(function(thread){
+    //         return (thread.labels.includes(category));
+    //     }).each(function (thread){
+    //         console.log(thread);
+    //     })
+    // }
 
     handleResponse = async (response) => {
         if (!response.hasOwnProperty('accessToken')){
@@ -65,21 +75,24 @@ class Login extends Component {
 
         const threadData = await this.serachDB("flockdev07@gmail", "threads");
         if(threadData){
-            threadData.map(value => {
-                this.props.setThreadDetails(value);
-            })
+            this.props.setThreadDetails(threadData);
         }
         else{
             apiManager.fetchAPI("threads", "").then((threadJson) => {
+                let threadArray = []
                 threadJson.threads.map(value => {
                     apiManager.fetchAPI("threads", value.id).then((threadDetailJson => {
-                        this.props.setThreadDetails(threadDetailJson);
-                        this.state.dbInstance.threads.put({ ...threadDetailJson });
+                        threadArray.push(threadDetailJson);
+                        this.props.setThreadDetails(threadArray);
+                        let unionLabels = [];
                         threadDetailJson.messages.map(value => {
+                            unionLabels = [...new Set([...unionLabels, ...value.labelIds])]
                             apiManager.fetchAPI("messages", value.id).then(messageDetailJson => {
                                 this.state.dbInstance.messages.put({ ...messageDetailJson })
                             })
                         })
+                        threadDetailJson.labels = unionLabels;
+                        this.state.dbInstance.threads.put({ ...threadDetailJson });
                     }))
                 })
             })
