@@ -4,9 +4,10 @@ import { refreshTokenSetup } from '../utils/refreshToken'
 import { CLIENT_ID, SCOPES } from '../utils/googleCredentials'
 import Dexie from 'dexie'
 import { ApiManager } from '../utils/apiManager'
+import 'dexie-observable';
 
 class Login extends Component {
-
+    
     connectIndexedDB = async() => {
         var db = new Dexie("flockdev07@gmail");
         db.version(1).stores({
@@ -14,6 +15,12 @@ class Login extends Component {
             threads: 'id, labels',
             messages: 'id',
         })
+
+        db.on('changes', function (changes) {
+              console.log("Something has changed");
+        });
+        
+        await db.open();
         return db;
     }
 
@@ -23,7 +30,7 @@ class Login extends Component {
             const db = await new Dexie(dbName).open();
             if(db.table(tableName)) {
                 const details = await db.table(tableName).toArray()
-                return details;
+                return (details && details.length ? details : null);
             }
             else{
                 return null;
