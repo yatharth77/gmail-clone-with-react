@@ -1,52 +1,31 @@
-import React, { Component } from 'react'
-import Dexie from 'dexie'
+import React, { Component, useState } from 'react'
+import { useLiveQuery } from "dexie-react-hooks";
 
-class Sidebar extends Component {
-    constructor(props){
-        super(props);
-    }
+function Sidebar(props) {
+    const [label, setLabel] = useState("INBOX");
+    
+    const labelResults = useLiveQuery(
+        () => props.dbInstance.threads.filter(thread => thread.labels.includes(label)).toArray(),
+        [label]
+    );
 
-    handleLabel = async (labelName, setThreadDetails) => {
+    const handleLabel = async (labelName) => {
         labelName = labelName.toUpperCase();
-        const db = await new Dexie("flockdev07@gmail").open()
-        const dataTable = db.table("threads");
-        dataTable.filter(function(thread){
-            return (thread.labels.includes(labelName));
-        }).toArray(data => {
-                setThreadDetails(data);
-        });
+        setLabel(labelName);
+        props.setThreadDetails(labelResults);
     }
     
-    processLabels = () => {
-        let labelArray = this.props.labels;
-        if(!labelArray){
-            return (
-                <ul className="list-unstyled components">
-                </ul>
-            )
-        }
-
-        return (
-            <ul className="list-unstyled components">
-                <p>Labels</p>
-                {
-                    labelArray.map((value, index) => {
-                        return <li onClick={() => this.handleLabel(value.name, this.props.setThreadDetails)} key={index}><a href="#">{value.name}</a></li>
-                    })
-                }
-            </ul>
-        )
-    }
-
-    render(){
-        if (this.props.signedInState) {
-            return this.processLabels();
-        }
-        else{
-            return (<ul></ul>)
-        }
-    }
-
+    let labelArray = props.labels;
+    return (
+        <ul className="list-unstyled components">
+            <p>Labels</p>
+            {
+                labelArray.map((value, index) => {
+                    return <li onClick={() => handleLabel(value.name)} key={index}><a href="#">{value.name}</a></li>
+                })
+            }
+        </ul>
+    )
 }
 
 export default Sidebar;

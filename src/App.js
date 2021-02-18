@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import LoadMessages from './components/LoadMessages'
 // import Logout from './components/Logout'
 import './App.css'
+// import TestingLiveQuery from './components/testingLiveQuery'
 
 class App extends Component {
   constructor(props) {
@@ -13,6 +14,7 @@ class App extends Component {
         accessToken: "",
         labels: [],
         threadDetails: [],
+        dbInstance: null,
     }
   }
 
@@ -36,6 +38,10 @@ class App extends Component {
     this.setState({ threadDetails: threadDetails });
   }
 
+  setDBInstance = (db) => {
+    this.setState({ dbInstance: db });
+  }
+
   render(){
       return(
         <div>
@@ -49,19 +55,29 @@ class App extends Component {
                     setAccessToken={this.setAccessToken}
                     setLabels={this.setLabels}
                     setThreadDetails={this.setThreadDetails}
+                    setDBInstance={this.setDBInstance}
+                    dbInstance={this.state.dbInstance}
                   />
-                  <Sidebar 
-                    signedInState={this.state.signedIn} 
-                    accessToken={this.state.accessToken}
-                    labels={this.state.labels}
-                    setThreadDetails={this.setThreadDetails}
-                  />
+                  { this.state.signedIn 
+                    ? <Sidebar 
+                        signedInState={this.state.signedIn} 
+                        accessToken={this.state.accessToken}
+                        labels={this.state.labels}
+                        setThreadDetails={this.setThreadDetails}
+                        dbInstance={this.state.dbInstance}
+                      />
+                    : null
+                  }
                 </div>
               </nav>
 
             <div className="login-div">
               { this.state.signedIn 
-                ? <h1>Welcome, you are signed <hr/> <LoadMessages threadDetails={this.state.threadDetails}/></h1>
+                ? <h1>Welcome, you are signed 
+                    <hr/> 
+                    <LoadMessages threadDetails={this.state.threadDetails}/>
+                    {/* <TestingLiveQuery db={this.state.dbInstance}/> */}
+                  </h1>
                 : <h1>Click to Signin</h1>
               }
 

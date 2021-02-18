@@ -6,22 +6,15 @@ import Dexie from 'dexie'
 import { ApiManager } from '../utils/apiManager'
 
 class Login extends Component {
-    
-    constructor(props){
-        super(props);
-        this.state = {
-            dbInstance: null,
-        }
-    }
 
-    connectIndexedDB = () => {
+    connectIndexedDB = async() => {
         var db = new Dexie("flockdev07@gmail");
         db.version(1).stores({
             labels: 'id',
             threads: 'id, labels',
             messages: 'id',
         })
-        this.setState({ dbInstance: db });
+        return db;
     }
 
     serachDB = async (dbName, tableName) => {
@@ -41,24 +34,16 @@ class Login extends Component {
         }    
     }
 
-    // fetchMailsOfLabel = async (category="INBOX") => { 
-    //     const db  = this.state.dbInstance;
-    //     console.log(db, db.threads);
-    //     db.threads.filter(function(thread){
-    //         return (thread.labels.includes(category));
-    //     }).each(function (thread){
-    //         console.log(thread);
-    //     })
-    // }
-
     handleResponse = async (response) => {
         if (!response.hasOwnProperty('accessToken')){
             return;
         }
         this.props.setAccessToken(response.tokenObj.access_token);
+
+        const db = await this.connectIndexedDB();
+        this.props.setDBInstance(db);
         this.props.setSignedInState({ signedIn: true });
 
-        this.connectIndexedDB();
         const apiManager = new ApiManager("me", this.props.accessToken);
         const labelData = await this.serachDB("flockdev07@gmail", "labels");
         if(labelData){
@@ -67,9 +52,9 @@ class Login extends Component {
         else{
             apiManager.fetchAPI("labels", "", this.props.accessToken).then((labelJson) => {
                 this.props.setLabels(labelJson.labels);
-                labelJson.labels.map((value) => {
-                    this.state.dbInstance.labels.put({ ...value })
-                })
+                labelJson.labels.map(value => 
+                    db.labels.put({ ...value })
+                )
             })
         }
 
@@ -80,21 +65,21 @@ class Login extends Component {
         else{
             apiManager.fetchAPI("threads", "").then((threadJson) => {
                 let threadArray = []
-                threadJson.threads.map(value => {
+                threadJson.threads.map(value => 
                     apiManager.fetchAPI("threads", value.id).then((threadDetailJson => {
                         threadArray.push(threadDetailJson);
                         this.props.setThreadDetails(threadArray);
                         let unionLabels = [];
                         threadDetailJson.messages.map(value => {
                             unionLabels = [...new Set([...unionLabels, ...value.labelIds])]
-                            apiManager.fetchAPI("messages", value.id).then(messageDetailJson => {
-                                this.state.dbInstance.messages.put({ ...messageDetailJson })
-                            })
+                            apiManager.fetchAPI("messages", value.id).then(messageDetailJson => 
+                                db.messages.put({ ...messageDetailJson })
+                            )
                         })
                         threadDetailJson.labels = unionLabels;
-                        this.state.dbInstance.threads.put({ ...threadDetailJson });
+                        db.threads.put({ ...threadDetailJson });
                     }))
-                })
+                )
             })
         }
         refreshTokenSetup(response);

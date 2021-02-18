@@ -3,10 +3,6 @@ import parse from 'html-react-parser';
 import '../style/style.css'
 
 class LoadMessages extends Component {
-    constructor(props) {
-        super(props);
-    }
-
     processThreads = () => {
         const threadDetailsArray = this.props.threadDetails;
         return (
