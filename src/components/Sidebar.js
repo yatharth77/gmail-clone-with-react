@@ -1,5 +1,6 @@
 import React, { Component, useState } from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
+import Dexie, { liveQuery } from "dexie";
 
 function Sidebar(props) {
     const [label, setLabel] = useState("INBOX");
@@ -16,7 +17,7 @@ function Sidebar(props) {
         () => props.dbInstance.threads.filter(thread => thread.labels.includes(label)).toArray(),
         [label]
     );
-
+    
     const handleLabel = async (labelName) => {
         labelName = labelName.toUpperCase();
         setLabel(labelName);

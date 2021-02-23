@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar'
 import LoadMessages from './components/LoadMessages'
 // import Logout from './components/Logout'
 import './App.css'
-// import TestingLiveQuery from './components/testingLiveQuery'
+import TestingLiveQuery from './components/testingLiveQuery'
 
 class App extends Component {
   constructor(props) {
@@ -76,7 +76,10 @@ class App extends Component {
                 ? <h1>Welcome, you are signed 
                     <hr/> 
                     <LoadMessages threadDetails={this.state.threadDetails}/>
-                    {/* <TestingLiveQuery db={this.state.dbInstance}/> */}
+                    <TestingLiveQuery db={this.state.dbInstance} 
+                      labels={this.state.labels}
+                      setLabels={this.setLabels}
+                    />
                   </h1>
                 : <h1>Click to Signin</h1>
               }
