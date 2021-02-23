@@ -1,20 +1,39 @@
-import React, { Component, useState } from 'react'
+import React, { Component, useEffect, useState } from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
 import Dexie, { liveQuery } from "dexie";
+import { db } from '../utils/dbManager'
+import TestQuery from "./TestQuery";
 
 function Sidebar(props) {
     const [label, setLabel] = useState("INBOX");
+    // const [testLabels, setTestLabels] = useState(["test 1", "test 2"]);
+
+    //////////////////////////
 
     const new_label = {
-        "id": "TESTING_LABEL", 
-        "name": "TESTING_LABEL", 
+        "id": "TESTING_LABEL" + Date.now(), 
+        "name": "TESTING_LABEL" + Date.now(), 
         "messageListVisibility": "hide",
         "labelListVisibility": "labelHide", 
         "type": "system"
     }
 
+    const testLabels = useLiveQuery (
+        () => db.labels.filter(label => label.name.includes("TESTING_LABEL")).toArray()
+      );
+      
+    // testQuery.subscribe({
+    // next: result => {
+    //     console.log(result, "testing");
+    //     setLabel(result);
+    // },
+    // error: error => console.error(error)
+    // });
+
+    //////////////////////////
+
     const labelResults = useLiveQuery(
-        () => props.dbInstance.threads.filter(thread => thread.labels.includes(label)).toArray(),
+        () => db.threads.filter(thread => thread.labels.includes(label)).toArray(),
         [label]
     );
     
@@ -23,10 +42,7 @@ function Sidebar(props) {
         setLabel(labelName);
         props.setThreadDetails(labelResults);
     }
-    
-    const addNewLabelInDB = () => {
-        props.dbInstance.labels.put({ ...new_label });
-    }
+
 
     let labelArray = props.labels;
     return (
@@ -39,7 +55,8 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            <button onClick={() => addNewLabelInDB()}>Add Labels</button>
+            <button onClick={() => db.labels.put(new_label)}>Add Labels</button>
+            <TestQuery testLabels={testLabels} />
         </div>
     )
 }

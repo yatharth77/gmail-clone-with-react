@@ -4,24 +4,13 @@ import { refreshTokenSetup } from '../utils/refreshToken'
 import { CLIENT_ID, SCOPES } from '../utils/googleCredentials'
 import Dexie from 'dexie'
 import { ApiManager } from '../utils/apiManager'
+import { db } from '../utils/dbManager'
 
 class Login extends Component {
-    
-    connectIndexedDB = async() => {
-        var db = new Dexie("flockdev07@gmail");
-        db.version(1).stores({
-            labels: 'id',
-            threads: 'id, labels',
-            messages: 'id',
-        })
-        await db.open();
-        return db;
-    }
 
     serachDB = async (dbName, tableName) => {
         const exist = await Dexie.exists(dbName);
         if(exist){
-            const db = await new Dexie(dbName).open();
             if(db.table(tableName)) {
                 const details = await db.table(tableName).toArray()
                 return (details && details.length ? details : null);
@@ -40,12 +29,7 @@ class Login extends Component {
             return;
         }
         this.props.setAccessToken(response.tokenObj.access_token);
-
-        const db = await this.connectIndexedDB();
-        this.props.setDBInstance(db);
-
         this.props.setSignedInState({ signedIn: true });
-
         const apiManager = new ApiManager("me", this.props.accessToken);
         const labelData = await this.serachDB("flockdev07@gmail", "labels");
         if(labelData){

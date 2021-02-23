@@ -14,7 +14,6 @@ class App extends Component {
         accessToken: "",
         labels: [],
         threadDetails: [],
-        dbInstance: null,
     }
   }
 
@@ -38,10 +37,6 @@ class App extends Component {
     this.setState({ threadDetails: threadDetails });
   }
 
-  setDBInstance = (db) => {
-    this.setState({ dbInstance: db });
-  }
-
   render(){
       return(
         <div>
@@ -55,8 +50,6 @@ class App extends Component {
                     setAccessToken={this.setAccessToken}
                     setLabels={this.setLabels}
                     setThreadDetails={this.setThreadDetails}
-                    setDBInstance={this.setDBInstance}
-                    dbInstance={this.state.dbInstance}
                   />
                   { this.state.signedIn 
                     ? <Sidebar 
@@ -64,7 +57,6 @@ class App extends Component {
                         accessToken={this.state.accessToken}
                         labels={this.state.labels}
                         setThreadDetails={this.setThreadDetails}
-                        dbInstance={this.state.dbInstance}
                       />
                     : null
                   }
@@ -76,10 +68,10 @@ class App extends Component {
                 ? <h1>Welcome, you are signed 
                     <hr/> 
                     <LoadMessages threadDetails={this.state.threadDetails}/>
-                    <TestingLiveQuery db={this.state.dbInstance} 
+                    {/* <TestingLiveQuery
                       labels={this.state.labels}
                       setLabels={this.setLabels}
-                    />
+                    /> */}
                   </h1>
                 : <h1>Click to Signin</h1>
               }

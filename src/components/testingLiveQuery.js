@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import Dexie, { liveQuery } from "dexie";
-import { renderIntoDocument } from "react-dom/test-utils";
+import { db } from '../utils/dbManager'
 
 function TestingLiveQuery(props) {
-
     const new_label = {
         "id": "TESTING_LABEL" + Date.now() ,
         "name": "TESTING_LABEL" + Date.now(), 
@@ -13,13 +12,12 @@ function TestingLiveQuery(props) {
     }
     
     const testQuery = liveQuery (
-      () => props.db.labels.filter(label => label.name.includes("TESTING_LABEL")).toArray()
+      () => db.labels.filter(label => label.name.includes("TESTING_LABEL")).toArray()
     );
     
     testQuery.subscribe({
       next: result => {
           console.log(result, "testing");
-          // props.setLabels(result);
         },
       error: error => console.error(error)
     });
@@ -27,7 +25,7 @@ function TestingLiveQuery(props) {
 
     return (
         <div>
-            <button onClick={() => props.db.labels.put(new_label)}>Click here to test live query</button>
+            <button onClick={() => db.labels.put(new_label)}>Click here to test live query</button>
         </div>
     );
 }
