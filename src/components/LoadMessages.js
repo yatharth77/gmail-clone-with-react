@@ -5,6 +5,7 @@ import '../style/style.css'
 class LoadMessages extends Component {
     processThreads = () => {
         const threadDetailsArray = this.props.threadDetails;
+        if(!threadDetailsArray) return null;
         return (
             <div className="list-group">
                 {

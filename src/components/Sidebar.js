@@ -2,40 +2,30 @@ import React, { Component, useEffect, useState } from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
 import Dexie, { liveQuery } from "dexie";
 import { db } from '../utils/dbManager'
-import TestQuery from "./TestQuery";
 
 function Sidebar(props) {
     const [label, setLabel] = useState("INBOX");
-    // const [testLabels, setTestLabels] = useState(["test 1", "test 2"]);
-
-    //////////////////////////
-
-    const new_label = {
-        "id": "TESTING_LABEL" + Date.now(), 
-        "name": "TESTING_LABEL" + Date.now(), 
-        "messageListVisibility": "hide",
-        "labelListVisibility": "labelHide", 
-        "type": "system"
+    
+    const addNewLabel = () => {
+        db.labels.add({
+            "id": "TESTING_LABEL" + Date.now(), 
+            "name": "TESTING_LABEL" + Date.now(), 
+            "messageListVisibility": "hide",
+            "labelListVisibility": "labelHide", 
+            "type": "system"
+        })
     }
 
-    const testLabels = useLiveQuery (
-        () => db.labels.filter(label => label.name.includes("TESTING_LABEL")).toArray()
-      );
-      
-    // testQuery.subscribe({
-    // next: result => {
-    //     console.log(result, "testing");
-    //     setLabel(result);
-    // },
-    // error: error => console.error(error)
-    // });
-
-    //////////////////////////
-
+    const labelArray = useLiveQuery (
+        () => db.labels.toArray()
+    );
+    
     const labelResults = useLiveQuery(
         () => db.threads.filter(thread => thread.labels.includes(label)).toArray(),
         [label]
     );
+
+    if(!labelArray) return null;
     
     const handleLabel = async (labelName) => {
         labelName = labelName.toUpperCase();
@@ -43,8 +33,6 @@ function Sidebar(props) {
         props.setThreadDetails(labelResults);
     }
 
-
-    let labelArray = props.labels;
     return (
         <div>
             <ul className="list-unstyled components">
@@ -55,8 +43,7 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            <button onClick={() => db.labels.put(new_label)}>Add Labels</button>
-            <TestQuery testLabels={testLabels} />
+            <button onClick={() => addNewLabel()}>Add Labels</button>
         </div>
     )
 }

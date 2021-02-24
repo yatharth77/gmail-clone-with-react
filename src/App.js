@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import Login from './components/Login'
-import Sidebar from './components/Sidebar'
+// import Sidebar from './components/Sidebar'
+import Sidebar2 from './components/Sidebar2'
 import LoadMessages from './components/LoadMessages'
 // import Logout from './components/Logout'
 import './App.css'
-import TestingLiveQuery from './components/testingLiveQuery'
 
 class App extends Component {
   constructor(props) {
@@ -52,10 +52,16 @@ class App extends Component {
                     setThreadDetails={this.setThreadDetails}
                   />
                   { this.state.signedIn 
-                    ? <Sidebar 
-                        signedInState={this.state.signedIn} 
-                        accessToken={this.state.accessToken}
+                    ? 
+                    // <Sidebar 
+                    //     signedInState={this.state.signedIn} 
+                    //     accessToken={this.state.accessToken}
+                    //     labels={this.state.labels}
+                    //     setThreadDetails={this.setThreadDetails}
+                    // />
+                      <Sidebar2
                         labels={this.state.labels}
+                        setLabels={this.setLabels}
                         setThreadDetails={this.setThreadDetails}
                       />
                     : null
@@ -68,10 +74,6 @@ class App extends Component {
                 ? <h1>Welcome, you are signed 
                     <hr/> 
                     <LoadMessages threadDetails={this.state.threadDetails}/>
-                    {/* <TestingLiveQuery
-                      labels={this.state.labels}
-                      setLabels={this.setLabels}
-                    /> */}
                   </h1>
                 : <h1>Click to Signin</h1>
               }
