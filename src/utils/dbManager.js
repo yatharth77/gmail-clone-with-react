@@ -5,6 +5,7 @@ dbInstance.version(1).stores({
     labels: 'id',
     threads: 'id, labels',
     messages: 'id',
+    profile: 'key'
 })
 dbInstance.open();
 

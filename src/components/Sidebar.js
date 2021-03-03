@@ -2,6 +2,7 @@ import React, { Component, useEffect, useState } from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
 import Dexie, { liveQuery } from "dexie";
 import { db } from '../utils/dbManager'
+import PartialSync from './PartialSync'
 
 function Sidebar(props) {
     const [label, setLabel] = useState("INBOX");
@@ -44,6 +45,10 @@ function Sidebar(props) {
                 }
             </ul>
             <button onClick={() => addNewLabel()}>Add Labels</button>
+            <PartialSync 
+                historyId={props.historyId}
+                accessToken={props.accessToken}
+            />
         </div>
     )
 }

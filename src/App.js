@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
-import Login from './components/Login'
+// import Login from './components/Login'
+import Login2 from './components/Login2'
 // import Sidebar from './components/Sidebar'
-import Sidebar2 from './components/Sidebar2'
+// import Sidebar2 from './components/Sidebar2'
+import Sidebar from './components/Sidebar'
 import LoadMessages from './components/LoadMessages'
 // import Logout from './components/Logout'
 import './App.css'
@@ -14,6 +16,7 @@ class App extends Component {
         accessToken: "",
         labels: [],
         threadDetails: [],
+        historyId: "",
     }
   }
 
@@ -37,6 +40,10 @@ class App extends Component {
     this.setState({ threadDetails: threadDetails });
   }
 
+  setHistoryID = (id) => {
+    this.setState({ historyId: id});
+  }
+
   render(){
       return(
         <div>
@@ -44,28 +51,39 @@ class App extends Component {
               <nav id="sidebar">
                 <div className="sidebar-header">
                   <h3>Welcome to Gmail clone</h3>
-                  <Login 
+                  {/* <Login 
                     setSignedInState={this.signIn} 
                     accessToken={this.state.accessToken}
                     setAccessToken={this.setAccessToken}
                     setLabels={this.setLabels}
                     setThreadDetails={this.setThreadDetails}
+                  /> */}
+                  <Login2
+                    setSignedInState={this.signIn} 
+                    accessToken={this.state.accessToken}
+                    setAccessToken={this.setAccessToken}
+                    setLabels={this.setLabels}
+                    setThreadDetails={this.setThreadDetails}
+                    historyId={this.state.historyId}
+                    setHistoryID={this.setHistoryID}
                   />
                   { this.state.signedIn 
                     ? 
-                    // <Sidebar 
-                    //     signedInState={this.state.signedIn} 
-                    //     accessToken={this.state.accessToken}
-                    //     labels={this.state.labels}
-                    //     setThreadDetails={this.setThreadDetails}
-                    // />
-                      <Sidebar2
+                    <Sidebar 
+                        signedInState={this.state.signedIn} 
+                        accessToken={this.state.accessToken}
                         labels={this.state.labels}
-                        setLabels={this.setLabels}
                         setThreadDetails={this.setThreadDetails}
-                      />
+                        historyId={this.state.historyId}
+                    />
+                      // <Sidebar2
+                      //   labels={this.state.labels}
+                      //   setLabels={this.setLabels}
+                      //   setThreadDetails={this.setThreadDetails}
+                      // />
                     : null
                   }
+
                 </div>
               </nav>
 
