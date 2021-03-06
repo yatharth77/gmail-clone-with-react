@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import Login2 from './components/Login2'
 import Sidebar from './components/Sidebar'
 import LoadMessages from './components/LoadMessages'
-// import Logout from './components/Logout'
+import Logout from './components/Logout'
 import './App.css'
 import { connect } from "react-redux";
 
@@ -25,10 +25,12 @@ function App(props) {
               <Login2 />
               { props.signedIn 
                 ? 
-                <Sidebar />
+                <div>
+                  <Sidebar />
+                  <Logout />
+                </div>
                 : null
               }
-
             </div>
           </nav>
 
@@ -42,7 +44,6 @@ function App(props) {
           }
 
         </div>
-        {/* <Logout setSignedInState={signOut} /> */}
       </div>
     </div>
   )

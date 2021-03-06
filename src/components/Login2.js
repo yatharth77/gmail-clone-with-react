@@ -92,6 +92,7 @@ class Login2 extends Component {
                 clientId={CLIENT_ID} 
                 scope={SCOPES} 
                 onSuccess={this.handleResponse}
+                isSignedIn={true}
             />
         </div>
         )

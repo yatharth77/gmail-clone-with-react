@@ -43,7 +43,7 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            <button onClick={() => addNewLabel()}>Add Labels</button>
+            {/* <button onClick={() => addNewLabel()}>Add Labels</button> */}
             <PartialSync />
         </div>
     )
