@@ -1,0 +1,4 @@
+export const ADD_ACCESS_TOKEN = "ADD_ACCESS_TOKEN";
+export const SET_USER_SIGNED_IN = "SET_USER_SIGNED_IN";
+export const SET_HISTORT_ID = "SET_HISTORT_ID";
+export const SET_LABEL = "SET_LABEL";
