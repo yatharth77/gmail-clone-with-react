@@ -22,14 +22,13 @@ function App(props) {
           <nav id="sidebar">
             <div className="sidebar-header">
               <h3>Welcome to Gmail clone</h3>
-              <Login2 />
               { props.signedIn 
                 ? 
                 <div>
                   <Sidebar />
                   <Logout />
                 </div>
-                : null
+                : <Login2 />
               }
             </div>
           </nav>

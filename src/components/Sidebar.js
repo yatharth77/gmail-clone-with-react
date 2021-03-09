@@ -13,15 +13,6 @@ function mapDispatchToProps(dispatch) {
 
 
 function Sidebar(props) {
-    const addNewLabel = () => {
-        db.labels.add({
-            "id": "TESTING_LABEL" + Date.now(), 
-            "name": "TESTING_LABEL" + Date.now(), 
-            "messageListVisibility": "hide",
-            "labelListVisibility": "labelHide", 
-            "type": "system"
-        })
-    }
 
     const labelArray = useLiveQuery (
         () => db.labels.toArray()
