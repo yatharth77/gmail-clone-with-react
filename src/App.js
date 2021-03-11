@@ -9,7 +9,6 @@ const mapStateToProps = state => {
   return { 
     accessToken: state.accessToken,
     signedIn: state.signedIn,
-    historyId: state.historyId,
     activeLabel: state.activeLabel,
   };
 };

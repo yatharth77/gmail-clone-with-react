@@ -1,23 +1,14 @@
 import React from 'react'
 import { Component } from 'react';
-import { db } from '../utils/dbManager';
-import { connect } from "react-redux";
-import { setHistoryId } from "../actions/index";
+import { getDB } from '../utils/dbManager';
 import store from "../store/index"
 import { ApiManager } from '../utils/apiManager'
-
-function mapDispatchToProps(dispatch) {
-    return {
-      setHistoryId: historyId => dispatch(setHistoryId(historyId)),
-    };
-  }
-
 
 class PartialSync extends Component {
     constructor() {
         super();
         this.state = {
-            apiManager: null,
+            db: getDB(),
         }
     }
     componentDidMount() {
@@ -33,8 +24,8 @@ class PartialSync extends Component {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
             const labelIds = message.message.labelIds;
-            db.messages.update(messageId, {...{labelIds: labelIds}});
-            db.threads.where('id').equals(threadId).modify(thread => {
+            this.state.db.messages.update(messageId, {...{labelIds: labelIds}});
+            this.state.db.threads.where('id').equals(threadId).modify(thread => {
                 const allMsg = thread.messages;
                 let unionLabels = [];
                 for(message in allMsg){
@@ -54,8 +45,8 @@ class PartialSync extends Component {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
             const labelIds = message.message.labelIds
-            db.messages.update(messageId, {...{labelIds: labelIds}});
-            db.threads.where('id').equals(threadId).modify(thread => {
+            this.state.db.messages.update(messageId, {...{labelIds: labelIds}});
+            this.state.db.threads.where('id').equals(threadId).modify(thread => {
                 const allMsg = thread.messages;
                 let unionLabels = [];
                 for(message in allMsg){
@@ -76,8 +67,8 @@ class PartialSync extends Component {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
             apiManager.fetchAPI("messages", messageId).then(messageDetailJson => {
-                db.messages.put({ ...messageDetailJson })
-                db.threads.where('id').equals(threadId).modify(thread => {
+                this.state.db.messages.put({ ...messageDetailJson })
+                this.state.db.threads.where('id').equals(threadId).modify(thread => {
                     thread.labels.concat(messageDetailJson.labelIds);
                     thread.messages.push(messageDetailJson)
                     return thread;
@@ -90,8 +81,8 @@ class PartialSync extends Component {
         messageDeleted.forEach(message => {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
-            db.messages.delete(messageId);
-            db.threads.where('id').equals(threadId).modify(thread = () =>{
+            this.state.db.messages.delete(messageId);
+            this.state.db.threads.where('id').equals(threadId).modify(thread = () =>{
                 const allMsg = thread.messages;
                 let unionLabels = [];
                 for(message in allMsg) {
@@ -108,32 +99,32 @@ class PartialSync extends Component {
     }
 
     syncMessageLabels = () => {
-        const historyId = store.getState().historyId;
-        var data = `startHistoryId=${historyId}&historyTypes=labelRemoved&historyTypes=labelAdded&historyTypes=messageAdded&historyTypes=messageDeleted`;
-        const apiManager = new ApiManager("me");
-        apiManager.fetchAPI("history", "", data).then((responseJson) => {
-            const responseHistoryJson = responseJson.history;
-            if(!responseHistoryJson) return;
-            responseHistoryJson.forEach(thread => {
-                console.log(thread);
-                if(!thread.labelsRemoved && !thread.labelsAdded && !thread.messagesAdded && !thread.messagesRemoved){
-                    return;
-                }
-                const labelsRemovedJson = thread.labelsRemoved;
-                if(labelsRemovedJson) this.handleLabelsRemoved(labelsRemovedJson);
-
-                const labelsAddedJson = thread.labelsAdded;
-                if(labelsAddedJson) this.handleLabelsAdded(labelsAddedJson);
-
-                const messagesAddedJson = thread.messagesAdded;
-                if(messagesAddedJson) this.handleMessagesAdded(messagesAddedJson, apiManager);
-
-                const messagesDeleted = thread.messagesDeleted;
-                if(messagesDeleted) this.handleMessagesDeleted(messagesDeleted, thread)
-            });
-            this.props.setHistoryId(responseJson.historyId);
+        this.state.db.profile.get('historyId').then(historyIdObject => {
+            const historyId = historyIdObject.value;
+            var data = `startHistoryId=${historyId}&historyTypes=labelRemoved&historyTypes=labelAdded&historyTypes=messageAdded&historyTypes=messageDeleted`;
+            const apiManager = new ApiManager("me");
+            apiManager.fetchAPI("history", "", data).then((responseJson) => {
+                const responseHistoryJson = responseJson.history;
+                if(!responseHistoryJson) return;
+                responseHistoryJson.forEach(thread => {
+                    if(!thread.labelsRemoved && !thread.labelsAdded && !thread.messagesAdded && !thread.messagesRemoved){
+                        return;
+                    }
+                    const labelsRemovedJson = thread.labelsRemoved;
+                    if(labelsRemovedJson) this.handleLabelsRemoved(labelsRemovedJson);
+    
+                    const labelsAddedJson = thread.labelsAdded;
+                    if(labelsAddedJson) this.handleLabelsAdded(labelsAddedJson);
+    
+                    const messagesAddedJson = thread.messagesAdded;
+                    if(messagesAddedJson) this.handleMessagesAdded(messagesAddedJson, apiManager);
+    
+                    const messagesDeleted = thread.messagesDeleted;
+                    if(messagesDeleted) this.handleMessagesDeleted(messagesDeleted, thread)
+                });
+                this.state.db.profile.update('historyId', responseJson.historyId);
+            })
         })
-        return;
     }
 
     render() {
@@ -143,7 +134,4 @@ class PartialSync extends Component {
     }
 }
 
-export default connect(
-    null,
-    mapDispatchToProps
-  )(PartialSync);
+export default PartialSync;

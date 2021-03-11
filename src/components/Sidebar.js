@@ -1,7 +1,7 @@
-import React, { Component, useEffect, useState } from 'react'
+import React from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from '../utils/dbManager'
-import PartialSync from './PartialSync'
+import { getDB } from '../utils/dbManager'
+import { PartialSync } from '../utils/PartialSync'
 import { setActiveLabel } from "../actions/index";
 import { connect } from "react-redux";
 import Logout from './Logout';
@@ -14,7 +14,7 @@ function mapDispatchToProps(dispatch) {
 
 
 function Sidebar(props) {
-
+    const db = getDB();
     const labelArray = useLiveQuery (
         () => db.labels.toArray()
     );
@@ -23,6 +23,11 @@ function Sidebar(props) {
     const handleLabel = async (activeLabel) => {
         activeLabel = activeLabel.toUpperCase();
         props.setActiveLabel(activeLabel);
+    }
+
+    const refreshContent = () => {
+        const partialSync = new PartialSync();
+        partialSync.syncData();
     }
 
     return (
@@ -36,7 +41,7 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            <PartialSync />
+            {refreshContent()}
         </div>
     )
 }

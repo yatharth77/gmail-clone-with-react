@@ -3,10 +3,11 @@ import parse from 'html-react-parser';
 import '../style/style.css'
 import { useLiveQuery } from "dexie-react-hooks";
 import store from "../store/index"
-import { db } from '../utils/dbManager'
+import { getDB } from '../utils/dbManager'
 
 function ThreadList() {
     const activeLabel = store.getState().activeLabel;
+    const db = getDB();
     const threadResult = useLiveQuery(
         () => db.threads.filter(thread => thread.labels.includes(activeLabel)).toArray(),
         [activeLabel]
@@ -25,7 +26,7 @@ function ThreadList() {
                             <div className="list-group">
                             {
                                 messages.map((message, messageIndex) => {
-                                    if(message.labelIds.includes('TRASH')) return null;
+                                    if(message.labelIds.includes('TRASH') && activeLabel != 'TRASH') return null;
                                     return (<a href="#" className="list-group-item" key={messageIndex}><p>Message {messageIndex+1}:</p>{parse(message.snippet)}</a>)
                                 })
                             }
