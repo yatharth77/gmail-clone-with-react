@@ -2,12 +2,13 @@ import React, { Component, useEffect, useState } from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from '../utils/dbManager'
 import PartialSync from './PartialSync'
-import { setLabel } from "../actions/index";
+import { setActiveLabel } from "../actions/index";
 import { connect } from "react-redux";
+import Logout from './Logout';
 
 function mapDispatchToProps(dispatch) {
     return {
-      setLabel: label => dispatch(setLabel(label)),
+      setActiveLabel: activeLabel => dispatch(setActiveLabel(activeLabel)),
     };
   }
 
@@ -19,13 +20,14 @@ function Sidebar(props) {
     );
     if(!labelArray) return null;
     
-    const handleLabel = async (labelName) => {
-        labelName = labelName.toUpperCase();
-        props.setLabel(labelName);
+    const handleLabel = async (activeLabel) => {
+        activeLabel = activeLabel.toUpperCase();
+        props.setActiveLabel(activeLabel);
     }
 
     return (
         <div>
+            {<Logout />}
             <ul className="list-unstyled components">
                 <p>Labels</p>
                 {
@@ -34,7 +36,6 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            {/* <button onClick={() => addNewLabel()}>Add Labels</button> */}
             <PartialSync />
         </div>
     )

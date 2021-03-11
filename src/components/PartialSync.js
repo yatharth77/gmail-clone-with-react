@@ -4,6 +4,7 @@ import { db } from '../utils/dbManager';
 import { connect } from "react-redux";
 import { setHistoryId } from "../actions/index";
 import store from "../store/index"
+import { ApiManager } from '../utils/apiManager'
 
 function mapDispatchToProps(dispatch) {
     return {
@@ -13,67 +14,130 @@ function mapDispatchToProps(dispatch) {
 
 
 class PartialSync extends Component {
+    constructor() {
+        super();
+        this.state = {
+            apiManager: null,
+        }
+    }
     componentDidMount() {
-        this.interval = setInterval(() => this.setState({ time: Date.now() }), 1000);
+        this.interval = setInterval(() => this.setState({ time: Date.now() }), 10000);
     }
     
     componentWillUnmount() {
         clearInterval(this.interval);
     }
 
+    handleLabelsRemoved(labelsRemovedJson) {
+        labelsRemovedJson.forEach(message => {
+            const threadId = message.message.threadId;
+            const messageId = message.message.id;
+            const labelIds = message.message.labelIds;
+            db.messages.update(messageId, {...{labelIds: labelIds}});
+            db.threads.where('id').equals(threadId).modify(thread => {
+                const allMsg = thread.messages;
+                let unionLabels = [];
+                for(message in allMsg){
+                    if(allMsg[message].id == messageId) {
+                        allMsg[message].labelIds = labelIds;
+                    }
+                    unionLabels = [...new Set([...unionLabels, ...allMsg[message].labelIds])]
+                }
+                thread.messages = allMsg;
+                thread.labels = unionLabels;
+            })
+        })  
+    }
+
+    handleLabelsAdded(labelsAddedJson) {
+        labelsAddedJson.forEach(message => {
+            const threadId = message.message.threadId;
+            const messageId = message.message.id;
+            const labelIds = message.message.labelIds
+            db.messages.update(messageId, {...{labelIds: labelIds}});
+            db.threads.where('id').equals(threadId).modify(thread => {
+                const allMsg = thread.messages;
+                let unionLabels = [];
+                for(message in allMsg){
+                    if(allMsg[message].id == messageId) {
+                        allMsg[message].labelIds = labelIds;
+                    }
+                    unionLabels = [...new Set([...unionLabels, ...allMsg[message].labelIds])]
+                }
+                thread.messages = allMsg;
+                thread.labels = unionLabels;
+                return thread;
+            })
+        })  
+    }
+
+    async handleMessagesAdded(messagesAddedJson, apiManager) {
+        messagesAddedJson.forEach(message => {
+            const threadId = message.message.threadId;
+            const messageId = message.message.id;
+            apiManager.fetchAPI("messages", messageId).then(messageDetailJson => {
+                db.messages.put({ ...messageDetailJson })
+                db.threads.where('id').equals(threadId).modify(thread => {
+                    thread.labels.concat(messageDetailJson.labelIds);
+                    thread.messages.push(messageDetailJson)
+                    return thread;
+                })
+            })
+        })
+    }
+
+    handleMessagesDeleted(messageDeleted, thread) {
+        messageDeleted.forEach(message => {
+            const threadId = message.message.threadId;
+            const messageId = message.message.id;
+            db.messages.delete(messageId);
+            db.threads.where('id').equals(threadId).modify(thread = () =>{
+                const allMsg = thread.messages;
+                let unionLabels = [];
+                for(message in allMsg) {
+                    if(allMsg[message].id === messageId)
+                        allMsg.splice(message, 1);
+                    else
+                        unionLabels = [...new Set([...unionLabels, ...allMsg[message].labelIds])]
+                }
+                thread.messages = allMsg;
+                thread.labels = unionLabels;
+                return thread;
+            });
+        })
+    }
+
     syncMessageLabels = () => {
         const historyId = store.getState().historyId;
-        var data = `startHistoryId=${historyId}&historyTypes=labelRemoved&historyTypes=labelAdded`;
-        var xhr = new XMLHttpRequest()
-        xhr.open('GET', `https://gmail.googleapis.com/gmail/v1/users/me/history/?${data}`);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + store.getState().accessToken);
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState !== 4) {
-                return;
-            }
-            if (xhr.status === 200) {
-                const responseJson = JSON.parse(xhr.responseText);
-                const responseHistoryJson = responseJson.history;
-                if(!responseHistoryJson) return;
-                responseHistoryJson.forEach(thread => {
-                    var threadId = null;
-                    var unionLabels = [];
-                    const labelsRemovedJson = thread.labelsRemoved;
-                    if(labelsRemovedJson){
-                        labelsRemovedJson.forEach(message => {
-                            threadId = message.message.threadId;
-                            const messageId = message.message.id;
-                            db.messages.update(messageId, {...{labelIds: message.message.labelIds}});
-                            unionLabels = [...new Set([...unionLabels, ...message.message.labelIds])];
-                        })  
-                        db.threads.update(threadId, {...{labels: unionLabels}});
-                    }
+        var data = `startHistoryId=${historyId}&historyTypes=labelRemoved&historyTypes=labelAdded&historyTypes=messageAdded&historyTypes=messageDeleted`;
+        const apiManager = new ApiManager("me");
+        apiManager.fetchAPI("history", "", data).then((responseJson) => {
+            const responseHistoryJson = responseJson.history;
+            if(!responseHistoryJson) return;
+            responseHistoryJson.forEach(thread => {
+                console.log(thread);
+                if(!thread.labelsRemoved && !thread.labelsAdded && !thread.messagesAdded && !thread.messagesRemoved){
+                    return;
+                }
+                const labelsRemovedJson = thread.labelsRemoved;
+                if(labelsRemovedJson) this.handleLabelsRemoved(labelsRemovedJson);
 
-                    threadId = null;
-                    unionLabels = [];
-                    const labelsAddedJson = thread.labelsAdded;
-                    if(labelsAddedJson){
-                        labelsAddedJson.forEach(message => {
-                            threadId = message.message.threadId;
-                            const messageId = message.message.id;
-                            db.messages.update(messageId, {...{labelIds: message.message.labelIds}});
-                            unionLabels = [...new Set([...unionLabels, ...message.message.labelIds])];
-                        })  
-                        db.threads.update(threadId, {...{labels: unionLabels}});
-                    }
-                });
-                this.props.setHistoryId(responseJson.historyId);
-            } else {
-                const error = xhr.statusText || 'The reason is mysterious. Call Yoda!';
-                console.log(error);
-            }
-        };
-        xhr.send();
+                const labelsAddedJson = thread.labelsAdded;
+                if(labelsAddedJson) this.handleLabelsAdded(labelsAddedJson);
+
+                const messagesAddedJson = thread.messagesAdded;
+                if(messagesAddedJson) this.handleMessagesAdded(messagesAddedJson, apiManager);
+
+                const messagesDeleted = thread.messagesDeleted;
+                if(messagesDeleted) this.handleMessagesDeleted(messagesDeleted, thread)
+            });
+            this.props.setHistoryId(responseJson.historyId);
+        })
+        return;
     }
 
     render() {
         return (
-            // <button onClick={() => this.syncMessageLabels()}>Click here to sync message-labels</button>
             <div>{this.syncMessageLabels()}</div>
         )
     }

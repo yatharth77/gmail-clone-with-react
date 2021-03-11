@@ -5,14 +5,14 @@ import { useLiveQuery } from "dexie-react-hooks";
 import store from "../store/index"
 import { db } from '../utils/dbManager'
 
-function LoadMessages() {
-    const label = store.getState().label;
+function ThreadList() {
+    const activeLabel = store.getState().activeLabel;
     const threadResult = useLiveQuery(
-        () => db.threads.filter(thread => thread.labels.includes(label)).toArray(),
-        [label]
+        () => db.threads.filter(thread => thread.labels.includes(activeLabel)).toArray(),
+        [activeLabel]
     );
     
-    if(!threadResult) return null;
+    if(!threadResult) return (<div>No thread found</div>);
 
     return(
         <div className="list-group">
@@ -25,6 +25,7 @@ function LoadMessages() {
                             <div className="list-group">
                             {
                                 messages.map((message, messageIndex) => {
+                                    if(message.labelIds.includes('TRASH')) return null;
                                     return (<a href="#" className="list-group-item" key={messageIndex}><p>Message {messageIndex+1}:</p>{parse(message.snippet)}</a>)
                                 })
                             }
@@ -38,5 +39,5 @@ function LoadMessages() {
 
 }
 
-export default LoadMessages;
+export default ThreadList;
  

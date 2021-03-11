@@ -1,10 +1,10 @@
-import { ADD_ACCESS_TOKEN, SET_USER_SIGNED_IN, SET_HISTORT_ID, SET_LABEL } from "../constants/action-types";
+import { ADD_ACCESS_TOKEN, SET_USER_SIGNED_IN, SET_HISTORT_ID, SET_ACTIVE_LABEL } from "../constants/action-types";
 
 const initialState = {
     accessToken: "",
     signedIn: false,
     historyId: "",
-    label: "INBOX",
+    activeLabel: "INBOX",
 };
   
 function rootReducer(state = initialState, action) {
@@ -23,9 +23,9 @@ function rootReducer(state = initialState, action) {
             historyId: action.payload
         })
     }
-    else if(action.type === SET_LABEL){
+    else if(action.type === SET_ACTIVE_LABEL){
         return Object.assign({}, state, {
-            label: action.payload
+            activeLabel: action.payload
         })
     }
     return state;

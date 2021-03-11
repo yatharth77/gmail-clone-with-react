@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import { GoogleLogout } from 'react-google-login'
-import { setAccessToken, setUserSignedIn, setHistoryId, setLabel } from "../actions/index";
+import { setAccessToken, setUserSignedIn, setHistoryId, setActiveLabel } from "../actions/index";
 import { CLIENT_ID } from '../utils/googleCredentials'
 import { connect } from "react-redux";
+import { db } from '../utils/dbManager'
 
 function mapDispatchToProps(dispatch) {
     return {
       setAccessToken: accessToken => dispatch(setAccessToken(accessToken)),
       setUserSignedIn: signedIn => dispatch(setUserSignedIn(signedIn)),
       setHistoryId: historyId => dispatch(setHistoryId(historyId)),
-      setLabel: label => dispatch(setLabel(label)),
+      setActiveLabel: activeLabel => dispatch(setActiveLabel(activeLabel)),
     };
   }
 
@@ -18,7 +19,8 @@ class Logout extends Component {
         this.props.setAccessToken("");
         this.props.setUserSignedIn(false);
         this.props.setHistoryId("");
-        this.props.setLabel("INBOX");
+        this.props.setActiveLabel("INBOX");
+        db.delete();
     }
     render(){
         return(
