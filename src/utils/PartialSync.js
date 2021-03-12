@@ -1,10 +1,8 @@
-import { getDB } from './dbManager';
 import { ApiManager } from './apiManager'
-import store from '../store';
-
-export class PartialSync {
-    constructor() {
-        this.db = getDB();
+import { PARTIAL_SYNC_TIME } from './constant'
+class PartialSync {
+    setDB = (db) => {
+        this.db = db;
     }
 
     handleLabelsRemoved = (labelsRemovedJson) => {
@@ -51,6 +49,7 @@ export class PartialSync {
     }
 
     handleMessagesAdded = (messagesAddedJson, apiManager) => {
+        console.log('I am called ')
         messagesAddedJson.forEach(message => {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
@@ -61,21 +60,6 @@ export class PartialSync {
                     thread.messages.push(messageDetailJson)
                     return thread;
                 })
-                // this.db.threads.get(threadId).then(threadExist => {
-                //     if(threadExist){
-                //         this.db.threads.where('id').equals(threadId).modify(thread => {
-                //             thread.labels.concat(messageDetailJson.labelIds);
-                //             thread.messages.push(messageDetailJson)
-                //             return thread;
-                //         })
-                //     }
-                //     else{
-                //         apiManager.fetchAPI("threads", threadId).then(threadDetailJson => {
-                //             threadDetailJson.labels = messageDetailJson.labelIds;
-                //             this.db.threads.put(threadDetailJson);
-                //         })
-                //     }
-                // });
             })
         })
     }
@@ -107,12 +91,12 @@ export class PartialSync {
         var data = `startHistoryId=${historyId}&historyTypes=labelRemoved&historyTypes=labelAdded&historyTypes=messageAdded&historyTypes=messageDeleted`;
         const apiManager = new ApiManager("me");
         apiManager.fetchAPI("history", "", data).then((responseJson) => {
-            console.log(responseJson);
             const responseHistoryJson = responseJson.history;
             if(!responseHistoryJson) return;
-            responseHistoryJson.forEach(thread => {
+            for(let index in responseHistoryJson){
+                const thread = responseHistoryJson[index];
                 if(!thread.labelsRemoved && !thread.labelsAdded && !thread.messagesAdded && !thread.messagesDeleted){
-                    return;
+                    continue;
                 }   
                 const labelsRemovedJson = thread.labelsRemoved;
                 if(labelsRemovedJson) this.handleLabelsRemoved(labelsRemovedJson);
@@ -125,12 +109,24 @@ export class PartialSync {
 
                 const messagesDeletedJson = thread.messagesDeleted;
                 if(messagesDeletedJson) this.handleMessagesDeleted(messagesDeletedJson, thread)
-            });
+            }
             this.db.profile.update('historyId', { ...{value: responseJson.historyId}});
+        })
+
+        apiManager.fetchAPI("labels", "").then((labelJson) => {
+            labelJson.labels.map(value => 
+                this.db.labels.put({ ...value })
+            )
         })
     }
 
     syncData = () => {
-        setInterval(this.syncMessageLabels, 10000);
+        this.interval = setInterval(this.syncMessageLabels, PARTIAL_SYNC_TIME);
+    }
+
+    stopSync = () => {
+        clearInterval(this.interval);
     }
 }
+
+export default new PartialSync;

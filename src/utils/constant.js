@@ -1,0 +1,1 @@
+export const PARTIAL_SYNC_TIME = 10000

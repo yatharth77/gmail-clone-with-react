@@ -1,7 +1,6 @@
 import React from 'react'
 import { useLiveQuery } from "dexie-react-hooks";
 import { getDB } from '../utils/dbManager'
-import { PartialSync } from '../utils/PartialSync'
 import { setActiveLabel } from "../actions/index";
 import { connect } from "react-redux";
 import Logout from './Logout';
@@ -25,11 +24,6 @@ function Sidebar(props) {
         props.setActiveLabel(activeLabel);
     }
 
-    const refreshContent = () => {
-        const partialSync = new PartialSync();
-        partialSync.syncData();
-    }
-
     return (
         <div>
             {<Logout />}
@@ -41,7 +35,6 @@ function Sidebar(props) {
                     })
                 }
             </ul>
-            {refreshContent()}
         </div>
     )
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { GoogleLogout } from 'react-google-login'
 import { setAccessToken, setUserSignedIn, setHistoryId, setActiveLabel } from "../actions/index";
 import { CLIENT_ID } from '../utils/googleCredentials'
+import partialSync from '../utils/PartialSync'
 import { connect } from "react-redux";
 import { clearDB } from '../utils/dbManager'
 
@@ -18,6 +19,7 @@ class Logout extends Component {
         this.props.setAccessToken("");
         this.props.setUserSignedIn(false);
         this.props.setActiveLabel("INBOX");
+        // partialSync.stopSync();
         // clearDB();
     }
     render(){

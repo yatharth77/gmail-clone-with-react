@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import Login from './components/Login'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
+import { getDB } from './utils/dbManager'
+import partialSync from './utils/PartialSync'
 import './App.css'
 import { connect } from "react-redux";
 
@@ -14,6 +16,13 @@ const mapStateToProps = state => {
 };
 
 function App(props) {
+  const db = getDB();
+
+  const refreshContent = () => {
+    partialSync.setDB(db);
+    partialSync.syncData();
+  }
+
   return(
     <div>
       <div className="wrapper">
@@ -35,6 +44,7 @@ function App(props) {
             ? <h1>Welcome, you are signed 
                 <hr/> 
                 <ThreadList />
+                {refreshContent()}
               </h1>
             : <h1>Click to Signin</h1>
           }
