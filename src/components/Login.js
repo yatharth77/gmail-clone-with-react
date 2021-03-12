@@ -6,6 +6,7 @@ import { setUpDB, serachDB } from '../utils/dbManager'
 import { connect } from "react-redux";
 import { setAccessToken, setUserSignedIn } from "../actions/index";
 import { FetchData } from '../utils/fetchData'
+import { beginSync } from "../utils/startStopSync";
 
 function mapDispatchToProps(dispatch) {
     return {
@@ -24,9 +25,9 @@ class Login extends Component {
         this.props.setAccessToken(response.tokenObj.access_token);
         const db = await setUpDB();
         const fetchData = new FetchData(db);
-        fetchData.fetchUserProfile();
-        fetchData.fetchLabelsAndThreads();
-        
+        await fetchData.fetchUserProfile();
+        await fetchData.fetchLabelsAndThreads();
+        beginSync();
         this.props.setUserSignedIn(true);
         refreshTokenSetup(response);
     }

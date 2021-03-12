@@ -48,18 +48,26 @@ class PartialSync {
         })  
     }
 
-    handleMessagesAdded = (messagesAddedJson, apiManager) => {
-        console.log('I am called ')
-        messagesAddedJson.forEach(message => {
+    handleMessagesAdded = async (messagesAddedJson, apiManager) => {
+        messagesAddedJson.forEach(async message => {
             const threadId = message.message.threadId;
             const messageId = message.message.id;
-            apiManager.fetchAPI("messages", messageId).then(messageDetailJson => {
+            apiManager.fetchAPI("messages", messageId).then(async messageDetailJson => {
                 this.db.messages.put({ ...messageDetailJson })
-                this.db.threads.where('id').equals(threadId).modify(thread => {
-                    thread.labels.concat(messageDetailJson.labelIds);
-                    thread.messages.push(messageDetailJson)
-                    return thread;
-                })
+                const threadExist = await this.db.threads.get(threadId);
+                if(threadExist){
+                    this.db.threads.where('id').equals(threadId).modify(thread => {
+                        thread.labels.concat(messageDetailJson.labelIds);
+                        thread.messages.push(messageDetailJson)
+                        return thread;
+                    })
+                }
+                else{
+                    apiManager.fetchAPI("threads", threadId).then((threadDetailJson => {
+                        threadDetailJson.labels = messageDetailJson.labelIds;
+                        this.db.threads.put({ ...threadDetailJson });
+                    }))
+                }
             })
         })
     }
