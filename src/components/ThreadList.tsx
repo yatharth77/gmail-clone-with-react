@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import { Threads } from '../utils/dbManager'
 import parse from 'html-react-parser';
 import '../style/style.css'
 import { useLiveQuery } from "dexie-react-hooks";
@@ -9,7 +9,7 @@ function ThreadList() {
     const activeLabel = store.getState().activeLabel;
     const db = getDB();
     const threadResult = useLiveQuery(
-        () => db.threads.filter(thread => thread.labels.includes(activeLabel)).toArray(),
+        () => db.threads.filter((thread: Threads) => thread.labels.includes(activeLabel)).toArray(),
         [activeLabel]
     );
     
@@ -18,7 +18,7 @@ function ThreadList() {
     return(
         <div className="list-group">
             {
-                threadResult.map((thread, threadIndex) => {
+                threadResult.map((thread: Threads, threadIndex: number) => {
                     const messages = thread.messages;
                     return (
                         <div key={threadIndex}>

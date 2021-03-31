@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import Login from './components/Login'
 import Sidebar from './components/Sidebar'
 import ThreadList from './components/ThreadList'
@@ -6,7 +6,13 @@ import { getDB } from './utils/dbManager'
 import './App.css'
 import { connect } from "react-redux";
 
-const mapStateToProps = state => {
+interface Iprops {
+  accessToken: string
+  signedIn: boolean
+  activeLabel: string
+  dispatch?: any
+}
+const mapStateToProps = (state: Iprops) => {
   return { 
     accessToken: state.accessToken,
     signedIn: state.signedIn,
@@ -14,7 +20,7 @@ const mapStateToProps = state => {
   };
 };
 
-function App(props) {
+function App(props: Iprops) {
   const db = getDB();
   return(
     <div>

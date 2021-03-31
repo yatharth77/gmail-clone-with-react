@@ -1,4 +1,11 @@
 import { ADD_ACCESS_TOKEN, SET_USER_SIGNED_IN, SET_ACTIVE_LABEL } from "../constants/action-types";
+import { IsetAccessToken, IsetUserSignedIn, IsetActiveLabel} from "../actions/index";
+
+interface IinitialState {
+    accessToken: string,
+    signedIn: boolean,
+    activeLabel: string,
+};
 
 const initialState = {
     accessToken: "",
@@ -6,7 +13,7 @@ const initialState = {
     activeLabel: "INBOX",
 };
   
-function rootReducer(state = initialState, action) {
+function rootReducer(state: IinitialState = initialState, action: IsetAccessToken | IsetActiveLabel | IsetUserSignedIn ) {
     if (action.type === ADD_ACCESS_TOKEN) {
         return Object.assign({}, state, {
             accessToken: action.payload

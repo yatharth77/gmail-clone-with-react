@@ -1,15 +1,18 @@
 import store from "../store/index"
 
 export class ApiManager {
+    user: string;
+    accessToken: string;
+    
     static BASE_URL = 'https://gmail.googleapis.com/gmail/v1/users/';
-    constructor(user){
+    constructor(user: string){
         this.user = user;
-        this.accessToken = store.getState().accessToken;;
-        this.objectName = "";
-        this.objectId = "";
+        this.accessToken = store.getState().accessToken;
     }
 
-    fetchAPI(objectName, objectId, dataString = null) {
+    fetchAPI(objectName?: string, objectId?: string, dataString?: string) {
+        if(!objectName) objectName = "";
+        if(!objectId) objectId = "";
         return new Promise((resolve, reject) => {
             let url = ApiManager.BASE_URL + this.user + '/' + objectName + '/' + objectId;
             if(dataString){

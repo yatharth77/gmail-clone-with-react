@@ -1,20 +1,26 @@
-import React, { Component } from 'react'
+import { Component } from 'react'
 import { GoogleLogout } from 'react-google-login'
-import { setAccessToken, setUserSignedIn, setHistoryId, setActiveLabel } from "../actions/index";
+import { setAccessToken, setUserSignedIn, setActiveLabel } from "../actions/index";
 import { CLIENT_ID } from '../utils/googleCredentials'
 import { connect } from "react-redux";
 import { clearDB } from '../utils/dbManager'
 import { stopSync } from "../utils/startStopSync";
 
-function mapDispatchToProps(dispatch) {
-    return {
-      setAccessToken: accessToken => dispatch(setAccessToken(accessToken)),
-      setUserSignedIn: signedIn => dispatch(setUserSignedIn(signedIn)),
-      setActiveLabel: activeLabel => dispatch(setActiveLabel(activeLabel)),
-    };
-  }
+interface IProps {
+  setAccessToken(accessToken: string): any
+  setUserSignedIn(signedIn: boolean): any
+  setActiveLabel(activeLabel: string): any
+}
 
-class Logout extends Component {
+function mapDispatchToProps(dispatch: any) {
+  return {
+    setAccessToken: (accessToken: string) => dispatch(setAccessToken(accessToken)),
+    setUserSignedIn: (signedIn: boolean) => dispatch(setUserSignedIn(signedIn)),
+    setActiveLabel: (activeLabel: string) => dispatch(setActiveLabel(activeLabel)),
+  };
+}
+
+class Logout extends Component<IProps> {
     handleResponse = () => {
         this.props.setAccessToken("");
         this.props.setUserSignedIn(false);
