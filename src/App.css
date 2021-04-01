@@ -1,7 +1,7 @@
 .login-div {
   margin: auto;
-  width: 50%;
-  border: 3px solid green;
+  width: 80%;
+  border: 3px solid white;
   padding: 10px;
 }
 
@@ -32,6 +32,23 @@ a[data-toggle="collapse"] {
   right: 20px;
   transform: translateY(-50%);
 }
+
+.list-group-threads {
+  display: none;
+}
+
+.list-group-header {
+  background-color: white;
+}
+
+.divider-header {
+  border-top: 1px solid black;
+}
+
+.divider-middle {
+  border-top: 1px dotted black;
+}
+
 
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 
@@ -98,5 +115,5 @@ ul ul a {
 }
 
 .login-div {
-  background-color: rgb(221, 242, 226);
+  background-color: rgb(253, 253, 253);
 }

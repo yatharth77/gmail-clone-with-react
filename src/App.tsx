@@ -41,7 +41,7 @@ function App(props: Iprops) {
         <div className="login-div">
           { props.signedIn 
             ? <h1>Welcome, you are signed 
-                <hr/> 
+                <hr className='divider-header'/> 
                 <ThreadList />
               </h1>
             : <h1>Click to Signin</h1>
